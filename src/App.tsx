@@ -1,58 +1,62 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, { useEffect } from 'react';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from 'react-router-dom';
+import styled from 'styled-components';
+import { useDispatch, useSelector} from 'react-redux';
 
-function App() {
+import { fetchQuestions, selectFetchStatus } from './containers/Questionnaire/questionnaireSlice';
+import { PAGES } from './pages';
+
+import Navbar from './components/Navbar';
+import About from './containers/About/About';
+import Questionnaire from './containers/Questionnaire/Questionnaire';
+import Report from './containers/Report/Report';
+import Preloader from './components/Preloader';
+
+const App: React.FC = () => {
+  const dispatch = useDispatch();
+  const loading = useSelector(selectFetchStatus);
+
+  const getQuestions = () => {
+    dispatch(fetchQuestions());
+  }
+
+  useEffect(() => {
+    getQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
+    <Router>
+      <Navbar pages={PAGES} />
+
+      { loading === 'pending' &&
+        <Preloader />
+      }
+
+      <PagesWrapper>
+        <Switch>
+          <Route path="/report">
+            <Report />
+          </Route>
+          <Route path="/questionnaire">
+            <Questionnaire />
+          </Route>
+          <Route path="/">
+            <About />
+          </Route>
+        </Switch>
+      </PagesWrapper>
+    </Router>
   );
 }
 
 export default App;
+
+const PagesWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
